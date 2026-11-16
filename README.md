@@ -2,16 +2,36 @@
 
 ## 1. Tentang Proyek
 
-Proyek **Toko** adalah aplikasi Produk & Order berbasis web yang dibangun secara bertahap dari nol untuk mempelajari arsitektur modern full-stack menggunakan Laravel, Inertia.js, dan Svelte. Dokumen ini menandai penyelesaian **Pertemuan 1 dari 9**, yang berfokus pada inisialisasi tech stack, penyiapan lingkungan kerja, pemahaman siklus hidup request (lifecycle request) dari server hingga ke komponen frontend Svelte 5, serta verifikasi pengujian dasar tanpa menambahkan fitur bisnis terlebih dahulu.
+Proyek **Toko** adalah aplikasi Produk & Order berbasis web yang dibangun secara bertahap dari nol untuk mempelajari arsitektur modern full-stack menggunakan Laravel 13, Inertia.js v3, Svelte 5, dan database PostgreSQL. Dokumen ini menandai penyelesaian **Pertemuan 1 dari 9**, yang berfokus pada:
+- Setup stack Laravel + Inertia + Svelte dengan database PostgreSQL.
+- Pembuatan model dan migration `Category` dengan UUID v7 (`HasUuids`) dan `$fillable`.
+- Seeding data awal minimal 3 kategori (`CategorySeeder`) dipanggil dari `DatabaseSeeder`.
+- Pembuatan route `GET /categories` bernama `categories.index` ke `CategoryController@index`.
+- Query data kategori menggunakan Eloquent dan pengiriman melalui `Inertia::render('categories/Index', [...])`.
+- Halaman `resources/js/pages/categories/Index.svelte` yang menampilkan nama dan deskripsi kategori.
+- Link navigasi ke halaman Kategori dari Dashboard.
+- Analisis dan dokumentasi dua kesalahan debug lab secara sengaja.
 
 ---
 
-## 2. Versi Terpasang
+## 2. Status Checklist Tugas Pertemuan 1 (8/8 Selesai)
 
-Berikut adalah rincian versi perangkat lunak dan pustaka yang terpasang pada proyek ini:
+- [x] **Setup proyek toko dengan starter kit Svelte dan PostgreSQL, push ke git.**
+- [x] **Migration + model Category (name, description) dengan HasUuids dan $fillable.**
+- [x] **CategorySeeder berisi minimal 3 kategori, dipanggil dari DatabaseSeeder; jalankan php artisan migrate --seed.**
+- [x] **Route GET /categories bernama categories.index ke CategoryController@index.**
+- [x] **Controller meng-query kategori dengan Eloquent dan mengirimnya lewat Inertia::render('categories/Index', [...]).**
+- [x] **resources/js/pages/categories/Index.svelte menampilkan nama dan deskripsi dari props.**
+- [x] **Link ke halaman Kategori dari dashboard.**
+- [x] **Debug: buat sengaja 2 error dari lab, catat pesan, penyebab, dan perbaikannya di README.md.**
+
+---
+
+## 3. Versi Terpasang
 
 - **PHP**: `8.3.36`
 - **Laravel Framework**: `13.42.0`
+- **Database Engine**: `PostgreSQL 16`
 - **Inertia.js (Server - `inertiajs/inertia-laravel`)**: `v3.7.0`
 - **Inertia.js (Client - `@inertiajs/svelte`)**: `v3.11.0`
 - **Svelte**: `v5.57.3`
@@ -20,9 +40,7 @@ Berikut adalah rincian versi perangkat lunak dan pustaka yang terpasang pada pro
 
 ---
 
-## 3. Cara Menjalankan
-
-Ikuti langkah-langkah berikut untuk menjalankan proyek di lingkungan lokal:
+## 4. Cara Menjalankan
 
 1. **Pasang dependensi PHP:**
    ```bash
@@ -34,20 +52,24 @@ Ikuti langkah-langkah berikut untuk menjalankan proyek di lingkungan lokal:
    npm install
    ```
 
-3. **Konfigurasi environment:**
-   Jika berkas `.env` belum ada, salin dari `.env.example`:
-   ```bash
-   cp .env.example .env
+3. **Konfigurasi database PostgreSQL pada `.env`:**
+   ```ini
+   DB_CONNECTION=pgsql
+   DB_HOST=127.0.0.1
+   DB_PORT=5432
+   DB_DATABASE=toko
+   DB_USERNAME=postgres
+   DB_PASSWORD=postgres
    ```
 
-4. **Generate application key:**
+4. **Generate Application Key:**
    ```bash
    php artisan key:generate
    ```
 
-5. **Jalankan migrasi database (SQLite):**
+5. **Jalankan migrasi dan seeder:**
    ```bash
-   php artisan migrate
+   php artisan migrate --seed
    ```
 
 6. **Jalankan development server:**
@@ -64,67 +86,51 @@ Ikuti langkah-langkah berikut untuk menjalankan proyek di lingkungan lokal:
 
 ---
 
-## 4. Jalur Request `/tentang` (Lifecycle Request)
+## 5. Jalur Request Halaman (Lifecycle Request)
 
-Berikut adalah urutan berkas nyata yang dilewati saat sebuah request HTTP diarahkan ke `/tentang`, mulai dari web server hingga komponen Svelte ditampilkan di layar:
-
-1. **`public/index.php`**  
-   Titik masuk (*entry point*) pertama setiap request HTTP. Berkas ini mendefinisikan konstanta waktu `LARAVEL_START`, memeriksa mode maintenance, memuat autoloader Composer (`vendor/autoload.php`), menginisialisasi bootstrap framework melalui `bootstrap/app.php`, dan menangani request yang masuk menggunakan `$app->handleRequest(Request::capture())`.
-
-2. **`bootstrap/app.php`**  
-   Pusat konfigurasi aplikasi pada struktur modern Laravel. Mengatur berkas routing (`routes/web.php` dan `routes/console.php`), rute pemantauan sistem `/up`, serta mendaftarkan middleware pipeline untuk grup `web`.
-
-3. **`app/Providers/AppServiceProvider.php`**  
-   Service provider dasar aplikasi yang dieksekusi saat framework melakukan fase booting untuk menginisialisasi layanan internal.
-
-4. **Middleware Grup `web` & `app/Http/Middleware/HandleInertiaRequests.php`**  
-   Request melewati middleware grup `web` bawaan (pengelolaan cookie, session, enkripsi, dan verifikasi CSRF). Selanjutnya dieksekusi middleware kustom yang terdaftar:
-   - `App\Http\Middleware\HandleAppearance`: mengatur preferensi tema (dark/light/system).
-   - `App\Http\Middleware\HandleInertiaRequests`: mendefinisikan data bersama (*shared props*) yang selalu dikirim ke Inertia, seperti nama aplikasi (`name`), status autentikasi (`auth.user`), dan status sidebar (`sidebarOpen`).
-   - `AddLinkHeadersForPreloadedAssets`: menambahkan header optimasi pemuatan aset.
-
-5. **`routes/web.php`**  
-   Router mencocokkan URI `GET /tentang` dengan route bernama `about` yang menunjuk ke invokable controller `AboutController::class`. Rute ini sengaja ditempatkan di luar grup `auth` agar dapat diakses oleh publik tanpa perlu autentikasi.
-
-6. **`app/Http/Controllers/AboutController.php`**  
-   Controller menjalankan fungsi invokable `__invoke()`. Di dalamnya, controller menyiapkan data props:
-   - `appName`: diambil dari `config('app.name')`
-   - `laravelVersion`: diambil dari `app()->version()`
-   - `features`: array berisi ringkasan peran Laravel, Inertia, dan Svelte 5.
-
-7. **`Inertia::render('About', [...])`**  
-   Inertia membungkus nama komponen `'About'` beserta payload props ke dalam sebuah response Inertia (`Inertia\Response`).
-
-8. **Pengiriman Respons HTTP:**
-   - **Kunjungan Langsung (First Page Visit):** Laravel merender tampilan induk Blade `resources/views/app.blade.php`. Komponen Blade `<x-inertia::app />` menyematkan atribut `data-page` yang berisi data JSON (nama komponen, props, url, dan versi aset).
-   - **Navigasi Client-side (`<Link>`):** Jika navigasi dilakukan melalui komponen `<Link>` dari dashboard, Inertia client menyertakan header `X-Inertia: true`. Laravel merespons dengan JSON murni berisi komponen dan props yang baru tanpa merender ulang HTML Blade.
-
-9. **`resources/js/app.ts`**  
-   Entry point JavaScript client. Menginisialisasi aplikasi menggunakan `createInertiaApp`, memuat berkas halaman Svelte dari direktori `resources/js/pages/`, menyetel layout default (`AppLayout`), serta mengaktifkan penanganan tema dan notifikasi flash toast.
-
-10. **`resources/js/pages/About.svelte`**  
-    Komponen frontend halaman tentang aplikasi. Menggunakan runes Svelte 5 (`$props()`) untuk menangkap `appName`, `laravelVersion`, dan `features`, memanfaatkan persistent layout breadcrumbs, dan merender informasi aplikasi beserta perulangan daftar fitur melalui blok `{#each features as feature}`.
+### A. Lifecycle `/categories`
+1. **`public/index.php`**: Menerima request HTTP `GET /categories` dan menjalankan autoloader.
+2. **`bootstrap/app.php`**: Mendaftarkan routing web dan middleware pipeline (Session, CSRF, `HandleInertiaRequests`).
+3. **`routes/web.php`**: Mencocokkan request dengan rute `categories.index` yang memanggil `CategoryController@index`.
+4. **`app/Http/Controllers/CategoryController.php`**: Method `index()` mengambil data kategori dari database menggunakan Eloquent (`Category::query()->orderBy('name')->get()`).
+5. **`Inertia::render('categories/Index', ['categories' => $categories])`**: Mengirim payload data ke komponen frontend Inertia.
+6. **`resources/js/pages/categories/Index.svelte`**: Menangkap data `categories` via runes Svelte 5 (`$props()`), merender kartu kategori (nama, deskripsi, dan UUID) ke dalam layout aplikasi.
 
 ---
 
-## 5. Penyesuaian dari Panduan
+## 6. Laporan Debugging: 2 Error Sengaja dari Lab
 
-Beberapa penyesuaian teknis dilakukan agar sesuai dengan kondisi lingkungan dan versi pustaka terbaru:
+Bagian ini mendokumentasikan dua kesalahan yang sengaja disimulasikan dari skenario lab pengembangan, lengkap dengan pesan error, akar penyebab, dan langkah perbaikannya:
 
-1. **Pembaruan PHP ke 8.3:**  
-   Starter kit resmi Svelte (`laravel/svelte-starter-kit` dengan Laravel 13) mewajibkan versi PHP minimal `^8.3`. PHP lokal diperbarui ke versi `8.3.36` dengan ekstensi SQLite, cURL, MBString, Fileinfo, OpenSSL, dan ZIP aktif.
-2. **Dependensi Frontend `@internationalized/date`:**  
-   Ditambahkan paket `@internationalized/date` ke dalam `package.json` untuk memenuhi dependensi komponen kalender pada `bits-ui` bawaan starter kit.
-3. **Penempatan Rute Bebas Autentikasi:**  
-   Route `about` diletakkan di luar middleware grup `auth` pada `routes/web.php` agar dapat diakses oleh publik tanpa mewajibkan sesi login.
-4. **Dukungan Routing Helper (Wayfinder):**  
-   Proyek starter kit Svelte ini menggunakan `@laravel/vite-plugin-wayfinder` untuk tipe rute TypeScript otomatis. Link di `Dashboard.svelte` tetap menggunakan `<Link href="/tentang">` sesuai instruksi, didukung dengan alias route `about` di backend.
+### Error 1: MassAssignmentException pada Model Category
+- **Pesan Error:**
+  ```text
+  Illuminate\Database\Eloquent\MassAssignmentException: Add [name] to fillable property to allow mass assignment on [App\Models\Category].
+  ```
+- **Penyebab:**
+  Terjadi saat menjalankan `Category::create(['name' => '...', 'description' => '...'])` di seeder atau controller sementara properti `$fillable` belum didefinisikan pada model `Category`. Secara bawaan, Eloquent menerapkan perlindungan mass-assignment untuk mencegah injeksi kolom yang tidak diizinkan.
+- **Perbaikan:**
+  Tambahkan definisi properti `$fillable` pada `app/Models/Category.php`:
+  ```php
+  protected $fillable = [
+      'name',
+      'description',
+  ];
+  ```
 
 ---
 
-## 6. Berkas Screenshot DevTools (Panduan Manual)
-
-Berdasarkan Bagian 7 dari panduan, pemilik proyek dapat melengkapi dua screenshot DevTools Network dan menyimpannya di folder `docs/screenshots/`:
-
-1. `docs/screenshots/01-initial-visit-html.png`: Screenshot DevTools → Network saat pertama kali membuka `/tentang` (respons berformat HTML lengkap).
-2. `docs/screenshots/02-inertia-link-json.png`: Screenshot DevTools → Network saat mengeklik tautan "Tentang aplikasi" dari Dashboard (respons berformat JSON dengan header `X-Inertia`).
+### Error 2: Driver PostgreSQL Belum Diaktifkan di PHP (`QueryException`)
+- **Pesan Error:**
+  ```text
+  Illuminate\Database\QueryException: could not find driver (Connection: pgsql, SQL: select * from information_schema.tables where table_schema = public and table_name = migrations and table_type = 'BASE TABLE')
+  ```
+- **Penyebab:**
+  Laravel disetel menggunakan driver `DB_CONNECTION=pgsql`, tetapi ekstensi `pdo_pgsql` dan `pgsql` pada konfigurasi runtime PHP (`php.ini`) masih dinonaktifkan (diberi tanda komentar `;extension=pdo_pgsql`). Akibatnya PHP PDO tidak mengenali driver PostgreSQL.
+- **Perbaikan:**
+  Buka berkas `php.ini` pada instalasi PHP aktif, hapus tanda titik koma (`;`) di depan ekstensi PDO PostgreSQL:
+  ```ini
+  extension=pdo_pgsql
+  extension=pgsql
+  ```
+  Simpan berkas, lalu restart service atau terminal agar ekstensi termuat (verifikasi dengan perintah `php -m | grep pgsql`).
