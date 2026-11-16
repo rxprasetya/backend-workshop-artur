@@ -1,0 +1,3 @@
+# Folder ini disiapkan untuk screenshot DevTools Network pemilik proyek:
+# 1. 01-initial-visit-html.png (kunjungan pertama ke /tentang - respons HTML)
+# 2. 02-inertia-link-json.png (klik Link dari dashboard - respons JSON dengan header X-Inertia)
