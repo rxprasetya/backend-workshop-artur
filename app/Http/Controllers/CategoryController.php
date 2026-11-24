@@ -19,4 +19,16 @@ class CategoryController extends Controller
             'categories' => $categories,
         ]);
     }
+
+    /**
+     * Display the specified category.
+     */
+    public function show(Category $category): Response
+    {
+        return Inertia::render('categories/Show', [
+            'category' => $category->only(
+                'id', 'name', 'description', 'created_at'
+            ),
+        ]);
+    }
 }

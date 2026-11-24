@@ -1,3 +1,7 @@
-# Folder ini disiapkan untuk screenshot DevTools Network pemilik proyek:
+# Direktori ini disiapkan untuk screenshot DevTools Network:
+# Pertemuan 1:
 # 1. 01-initial-visit-html.png (kunjungan pertama ke /tentang - respons HTML)
 # 2. 02-inertia-link-json.png (klik Link dari dashboard - respons JSON dengan header X-Inertia)
+# Pertemuan 2:
+# 3. 03-categories-initial-visit-html.png (kunjungan pertama ke /categories - respons HTML berisi data halaman)
+# 4. 04-categories-show-inertia-json.png (klik link detail kategori dari Index - respons JSON dengan header X-Inertia)

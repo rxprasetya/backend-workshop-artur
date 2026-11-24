@@ -1,9 +1,11 @@
 <script module lang="ts">
+    import { about } from '@/routes';
+
     export const layout = {
         breadcrumbs: [
             {
                 title: 'Tentang',
-                href: '/tentang',
+                href: about(),
             },
         ],
     };

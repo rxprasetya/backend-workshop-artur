@@ -1,16 +1,20 @@
 <script module lang="ts">
+    import { index } from '@/routes/categories';
+
     export const layout = {
         breadcrumbs: [
             {
                 title: 'Kategori',
-                href: '/categories',
+                href: index(),
             },
         ],
     };
 </script>
 
 <script lang="ts">
+    import { Link } from '@inertiajs/svelte';
     import AppHead from '@/components/AppHead.svelte';
+    import { show } from '@/routes/categories';
 
     interface Category {
         id: string;
@@ -48,7 +52,12 @@
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg font-semibold tracking-tight text-foreground">
-                                {category.name}
+                                <Link
+                                    href={show(category.id)}
+                                    class="hover:underline hover:text-primary transition-colors"
+                                >
+                                    {category.name}
+                                </Link>
                             </h2>
                             <span class="rounded-md bg-muted px-2 py-0.5 text-xs font-mono text-muted-foreground">
                                 UUID
@@ -59,14 +68,19 @@
                         </p>
                     </div>
 
-                    <div class="mt-4 pt-3 border-t border-sidebar-border/50">
+                    <div class="mt-4 pt-3 border-t border-sidebar-border/50 flex items-center justify-between">
                         <span class="text-[11px] font-mono text-muted-foreground/80 break-all">
                             ID: {category.id}
                         </span>
+                        <Link
+                            href={show(category.id)}
+                            class="text-xs font-medium text-primary hover:underline"
+                        >
+                            Lihat Detail →
+                        </Link>
                     </div>
                 </div>
             {/each}
         </div>
     {/if}
 </div>
-

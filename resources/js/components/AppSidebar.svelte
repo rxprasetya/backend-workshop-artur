@@ -3,6 +3,7 @@
     import BookOpen from '@lucide/svelte/icons/book-open';
     import FolderGit2 from '@lucide/svelte/icons/folder-git-2';
     import LayoutGrid from '@lucide/svelte/icons/layout-grid';
+    import Tags from '@lucide/svelte/icons/tags';
     import type { Snippet } from 'svelte';
     import AppLogo from '@/components/AppLogo.svelte';
     import NavFooter from '@/components/NavFooter.svelte';
@@ -19,6 +20,7 @@
     } from '@/components/ui/sidebar';
     import { toUrl } from '@/lib/utils';
     import { dashboard } from '@/routes';
+    import { index as categoriesIndex } from '@/routes/categories';
     import type { NavItem } from '@/types';
 
     let {
@@ -32,6 +34,11 @@
             title: 'Dashboard',
             href: dashboard(),
             icon: LayoutGrid,
+        },
+        {
+            title: 'Kategori',
+            href: categoriesIndex(),
+            icon: Tags,
         },
     ];
 
@@ -58,7 +65,7 @@
                         <Link
                             {...props}
                             href={toUrl(dashboard())}
-                            class={props.class}
+                            class="flex items-center gap-2"
                         >
                             <AppLogo />
                         </Link>
@@ -73,7 +80,7 @@
     </SidebarContent>
 
     <SidebarFooter>
-        <NavFooter items={footerNavItems} />
+        <NavFooter items={footerNavItems} class="mt-auto" />
         <NavUser />
     </SidebarFooter>
 </Sidebar>

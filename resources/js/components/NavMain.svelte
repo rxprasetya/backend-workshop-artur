@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Link } from '@inertiajs/svelte';
+    import { Link, page } from '@inertiajs/svelte';
     import {
         SidebarGroup,
         SidebarGroupLabel,
@@ -18,16 +18,22 @@
     } = $props();
 
     const url = currentUrlState();
+    const currentRoute = $derived(page.props.currentRoute as string | undefined);
 </script>
 
 <SidebarGroup class="px-2 py-0">
     <SidebarGroupLabel>Platform</SidebarGroupLabel>
     <SidebarMenu>
         {#each items as item (toUrl(item.href))}
+            {@const isItemActive =
+                item.isActive ??
+                (url.isCurrentUrl(item.href, url.currentUrl) ||
+                    (item.title === 'Kategori' && currentRoute?.startsWith('categories.')) ||
+                    (item.title === 'Dashboard' && currentRoute === 'dashboard'))}
             <SidebarMenuItem>
                 <SidebarMenuButton
                     asChild
-                    isActive={url.isCurrentUrl(item.href, url.currentUrl)}
+                    isActive={isItemActive}
                     tooltip={item.title}
                 >
                     {#snippet children(props)}

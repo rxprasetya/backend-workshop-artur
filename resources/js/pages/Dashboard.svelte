@@ -15,6 +15,8 @@
     import { Link } from '@inertiajs/svelte';
     import AppHead from '@/components/AppHead.svelte';
     import PlaceholderPattern from '@/components/PlaceholderPattern.svelte';
+    import { about } from '@/routes';
+    import { index as categoriesIndex } from '@/routes/categories';
 </script>
 
 <AppHead title="Dashboard" />
@@ -24,13 +26,13 @@
         <span class="text-sm text-muted-foreground">Navigasi Cepat:</span>
         <div class="flex items-center gap-2">
             <Link
-                href="/categories"
+                href={categoriesIndex()}
                 class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-xs hover:bg-secondary/80"
             >
                 Halaman Kategori
             </Link>
             <Link
-                href="/tentang"
+                href={about()}
                 class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-xs hover:bg-primary/90"
             >
                 Tentang aplikasi
